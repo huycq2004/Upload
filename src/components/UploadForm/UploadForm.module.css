@@ -1,0 +1,16 @@
+.formContainer {
+  background-color: #f9f9fc;
+}
+
+.fileItem {
+  background-color: #fefefe;
+  transition: all 0.2s ease-in-out;
+}
+
+.fileItem:hover {
+  background-color: #f1f8ff;
+}
+
+.fileIcon {
+  color: #007bff;
+}
