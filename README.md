@@ -30,14 +30,15 @@ ADMIN_USERNAME=name
 ADMIN_PASSWORD=password
 
 ### Bước 4: Tạo cơ sở dữ liệu
-CREATE DATABASE upload_files_db;
+CREATE DATABASE upload_files_management;
 
 -- Bảng user
 CREATE TABLE user (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255),
-  class VARCHAR(50),
-  upload_date DATETIME DEFAULT CURRENT_TIMESTAMP
+  user_id INT AUTO_INCREMENT PRIMARY KEY,
+  ho_ten VARCHAR(255),
+  lop VARCHAR(100),
+  upload_time DATETIME DEFAULT CURRENT_TI  MESTAMP,
+  folder_name VARCHAR(255)
 );
 
 -- Bảng detail (file chi tiết)
@@ -45,9 +46,9 @@ CREATE TABLE detail (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
   file_name VARCHAR(255),
-  file_type VARCHAR(50),
-  file_size BIGINT,
-  folder_name VARCHAR(255),
+  file_path VARCHAR(255),
+  file_type VARCHAR(100),
+  file_size INT,
   FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
