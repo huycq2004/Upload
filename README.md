@@ -19,7 +19,7 @@ cd upload-files-project
 cd file-upload-backend
 npm install
 
-### Bước 3: Cấu hình file file-upload-backend\.env
+### Bước 3: Cấu hình file-upload-backend \ .env
 PORT=5000
 DB_HOST=localhost
 DB_USER=root
