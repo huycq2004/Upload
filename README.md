@@ -24,8 +24,8 @@ PORT=5000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_password
-DB_NAME=upload_files_db
-UPLOAD_DIR=uploads
+DB_NAME=upload_files_management
+UPLOAD_DIR=D:/uploads
 ADMIN_USERNAME=name
 ADMIN_PASSWORD=password
 
