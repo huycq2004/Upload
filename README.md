@@ -37,7 +37,7 @@ CREATE TABLE user (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
   ho_ten VARCHAR(255),
   lop VARCHAR(100),
-  upload_time DATETIME DEFAULT CURRENT_TI  MESTAMP,
+  upload_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   folder_name VARCHAR(255)
 );
 
@@ -49,7 +49,7 @@ CREATE TABLE detail (
   file_path VARCHAR(255),
   file_type VARCHAR(100),
   file_size INT,
-  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
 
 ### Bước 5: Chạy server
