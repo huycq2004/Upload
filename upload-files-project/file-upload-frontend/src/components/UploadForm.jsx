@@ -1,24 +1,43 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, File, Check, User, GraduationCap, AlertCircle } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import FileUploadGroup from './FileUploadGroup';
 
 function UploadForm() {
+  //Khai báo useState cho họ và tên + lớp
   const [fullName, setFullName] = useState('');
   const [className, setClassName] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
+
+  // Group 1: Văn bản
+  const [filesGroup1, setFilesGroup1] = useState([]);
+  const [isDragging1, setIsDragging1] = useState(false);
+  const fileInputRef1 = useRef(null);
+
+  // Group 2: Hình ảnh
+  const [filesGroup2, setFilesGroup2] = useState([]);
+  const [isDragging2, setIsDragging2] = useState(false);
+  const fileInputRef2 = useRef(null);
+
+  // Group 3: Tài liệu khác
+  const [filesGroup3, setFilesGroup3] = useState([]);
+  const [isDragging3, setIsDragging3] = useState(false);
+  const fileInputRef3 = useRef(null);
+  
+  // Khai báo usetState cho Error & uploading
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState({});
-  const fileInputRef = useRef(null);
+
+  // Khai báo hook chuyển hướng trang
   const navigate = useNavigate();
   
   const validateForm = () => {
     const newErrors = {};
     if (!fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ và tên';
     if (!className.trim()) newErrors.className = 'Vui lòng nhập lớp';
-    if (selectedFiles.length === 0) newErrors.files = 'Vui lòng chọn ít nhất một file';
+    if (filesGroup1.length === 0) newErrors.group1 = 'Bạn cần chọn ít nhất một file';
+    if (filesGroup2.length === 0) newErrors.group2 = 'Bạn cần chọn ít nhất một file';
+    if (filesGroup3.length === 0) newErrors.group3 = 'Bạn cần chọn ít nhất một file';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -30,57 +49,44 @@ function UploadForm() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
-
-  const handleFileSelect = (files) => {
+  
+  const handleFileSelect = (files, setFileGroup) => {
     if (!files) return;
-    const fileArray = Array.from(files);
-    const mapped = fileArray.map(file => ({
-      file,
+    const fileArray = Array.from(files).map(file => ({
       id: Math.random().toString(36).substring(2),
+      file,
       uploadedAt: new Date(),
     }));
-    setSelectedFiles(prev => [...prev, ...mapped]);
-    setErrors(prev => ({ ...prev, files: '' }));
+
+    setFileGroup(prev => [...prev, ...fileArray]);
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFileSelect(e.dataTransfer.files);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const removeFile = (id) => {
-    setSelectedFiles(prev => prev.filter(f => f.id !== id));
+  const removeFile = (id, setFileGroup) => {
+    setFileGroup(prev => prev.filter(f => f.id !== id));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    const allFiles = [
+      ...filesGroup1.map(f => ({ ...f, group: 'Tepvanban' })),
+      ...filesGroup2.map(f => ({ ...f, group: 'Hinhanh' })),
+      ...filesGroup3.map(f => ({ ...f, group: 'Tailieukhac' })),
+    ];
+
     const formData = new FormData();
     formData.append('ho_ten', fullName);
     formData.append('lop', className);
-    selectedFiles.forEach(f => {
-      formData.append('files', f.file); // `f.file` là file gốc
+    allFiles.forEach(f => {
+      formData.append('files', f.file); // file
+      formData.append('fileGroups', f.group); // tên nhóm tương ứng
     });
 
     try {
       setIsUploading(true);
-
       const res = await axios.post('http://localhost:5000/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       if (res.status === 200 && res.data?.user?.files) {
@@ -98,18 +104,18 @@ function UploadForm() {
           }
         });
 
-        // Reset form
         setFullName('');
         setClassName('');
-        setSelectedFiles([]);
+        setFilesGroup1([]);
+        setFilesGroup2([]);
+        setFilesGroup3([]);
       } else {
-        // Nếu response trả về lỗi nhưng không throw, vẫn điều hướng đến /error
         const message = res.data?.message || 'Lỗi không xác định từ máy chủ.';
         navigate('/error', {
           state: {
             errorType: 'server',
             errorMessage: message,
-            failedFiles: selectedFiles.map(f => ({
+            failedFiles: allFiles.map(f => ({
               name: f.file.name,
               size: f.file.size,
               error: 'Không rõ lý do'
@@ -117,9 +123,7 @@ function UploadForm() {
           }
         });
       }
-
     } catch (err) {
-      // Trường hợp request lỗi hoàn toàn (network, CORS, timeout...)
       const errorType = err.response ? 'server' : 'network';
       const errorMessage = err.response?.data?.message || err.message || 'Lỗi không xác định';
 
@@ -127,7 +131,7 @@ function UploadForm() {
         state: {
           errorType,
           errorMessage,
-          failedFiles: selectedFiles.map(f => ({
+          failedFiles: allFiles.map(f => ({
             name: f.file.name,
             size: f.file.size,
             error: 'Upload thất bại'
@@ -206,80 +210,44 @@ function UploadForm() {
           </div>
 
           {/* File Upload */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-gray-700">
-              <File className="w-4 h-4 mr-2 text-blue-600" />
-              Chọn file đính kèm
-            </label>
+          <FileUploadGroup
+            label="Tệp văn bản"
+            files={filesGroup1}
+            onFileSelect={(files) => handleFileSelect(files, setFilesGroup1)}
+            onRemoveFile={(id) => removeFile(id, setFilesGroup1)}
+            isDragging={isDragging1}
+            setIsDragging={setIsDragging1}
+            error={errors.group1}
+            fileInputRef={fileInputRef1}
+            isUploading={isUploading}
+            formatFileSize={formatFileSize}
+          />
 
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer hover:bg-gray-50 ${
-                isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-              } ${errors.files ? 'border-red-300 bg-red-50' : ''}`}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                onChange={(e) => handleFileSelect(e.target.files)}
-                className="hidden"
-              />
-              {isUploading ? (
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                  <p className="text-gray-600">Đang tải lên...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600 mb-2">
-                    Kéo thả file vào đây hoặc <span className="text-blue-600 font-medium">nhấp để chọn</span>
-                  </p>
-                  <p className="text-sm text-gray-500">Hỗ trợ tất cả các loại file</p>
-                </div>
-              )}
-            </div>
+          <FileUploadGroup
+            label="Hình ảnh"
+            files={filesGroup2}
+            onFileSelect={(files) => handleFileSelect(files, setFilesGroup2)}
+            onRemoveFile={(id) => removeFile(id, setFilesGroup2)}
+            isDragging={isDragging2}
+            setIsDragging={setIsDragging2}
+            error={errors.group2}
+            fileInputRef={fileInputRef2}
+            isUploading={isUploading}
+            formatFileSize={formatFileSize}
+          />
 
-            {errors.files && (
-              <p className="flex items-center text-sm text-red-600">
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {errors.files}
-              </p>
-            )}
-          </div>
-
-          {/* Uploaded Files */}
-          {selectedFiles.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm text-left font-medium text-gray-700">File đã tải lên ({selectedFiles.length})</h3>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {selectedFiles.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
-                    <div className="flex items-center space-x-3">
-                      <File className="w-5 h-5 text-blue-600" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.file.name}</p>
-                        <p className="text-xs text-left text-gray-500">
-                          {formatFileSize(item.file.size)} • {item.uploadedAt.toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(item.id)}
-                      className="p-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <FileUploadGroup
+            label="Tài liệu khác"
+            files={filesGroup3}
+            onFileSelect={(files) => handleFileSelect(files, setFilesGroup3)}
+            onRemoveFile={(id) => removeFile(id, setFilesGroup3)}
+            isDragging={isDragging3}
+            setIsDragging={setIsDragging3}
+            error={errors.group3}
+            fileInputRef={fileInputRef3}
+            isUploading={isUploading}
+            formatFileSize={formatFileSize}
+          />
 
           {/* Submit */}
           <button

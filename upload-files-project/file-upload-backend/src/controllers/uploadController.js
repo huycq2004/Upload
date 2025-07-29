@@ -8,17 +8,31 @@ function formatTimestamp() {
   const pad = (n) => n.toString().padStart(2, '0');
   return `${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 }
+
+function formatDateOnly() {
+  const now = new Date();
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}`;
+}
+
 const UPLOAD_BASE = process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads');
 
 exports.handleUpload = (req, res) => {
   const { ho_ten, lop } = req.body;
   const files = req.files;
+  let fileGroups = req.body.fileGroups;
 
   if (!ho_ten || !lop || !files || files.length === 0) {
     return res.status(400).json({ message: 'Thiếu thông tin hoặc file.' });
   }
 
-  const folderName = `${ho_ten.replace(/\s+/g, '_')}_${lop}_${formatTimestamp()}`;
+  // Đảm bảo fileGroups luôn là mảng
+  if (!Array.isArray(fileGroups)) {
+    fileGroups = [fileGroups];
+  }
+
+  const folder_timestamp = formatTimestamp();
+  const folderName = `${ho_ten.replace(/\s+/g, '_')}_${lop}_${folder_timestamp}`;
   const uploadDir = path.join(UPLOAD_BASE, folderName);
 
   if (!fs.existsSync(uploadDir)) {
@@ -35,8 +49,10 @@ exports.handleUpload = (req, res) => {
     const user_id = userResult.insertId;
 
     const fileInsertions = files.map((file, index) => {
+      const file_timestamp = formatDateOnly();
+      const group = fileGroups[index] || 'unknown';
       const ext = path.extname(file.originalname);
-      const baseName = `${folderName}_${index + 1}${ext}`;
+      const baseName = `${ho_ten.replace(/\s+/g, '_')}_${group}_${file_timestamp}_${ext}`;
       const relativePath = path.join('uploads', folderName, baseName);
       const absolutePath = path.join(uploadDir, baseName);
 
