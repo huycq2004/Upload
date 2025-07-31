@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, File, Check, User, GraduationCap, AlertCircle } from 'lucide-react';
+import { Upload, Check, User, GraduationCap, AlertCircle, CalendarDays, Phone, IdCard } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import FileUploadGroup from './FileUploadGroup';
@@ -7,19 +7,21 @@ import FileUploadGroup from './FileUploadGroup';
 function UploadForm() {
   //Khai báo useState cho họ và tên + lớp
   const [fullName, setFullName] = useState('');
-  const [className, setClassName] = useState('');
+  const [dob, setDob] = useState('');
+  const [phone, setPhone] = useState('');
+  const [idNumber, setIdNumber] = useState('');
 
-  // Group 1: Văn bản
+  // Group 1
   const [filesGroup1, setFilesGroup1] = useState([]);
   const [isDragging1, setIsDragging1] = useState(false);
   const fileInputRef1 = useRef(null);
 
-  // Group 2: Hình ảnh
+  // Group 2
   const [filesGroup2, setFilesGroup2] = useState([]);
   const [isDragging2, setIsDragging2] = useState(false);
   const fileInputRef2 = useRef(null);
 
-  // Group 3: Tài liệu khác
+  // Group 3
   const [filesGroup3, setFilesGroup3] = useState([]);
   const [isDragging3, setIsDragging3] = useState(false);
   const fileInputRef3 = useRef(null);
@@ -34,7 +36,9 @@ function UploadForm() {
   const validateForm = () => {
     const newErrors = {};
     if (!fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ và tên';
-    if (!className.trim()) newErrors.className = 'Vui lòng nhập lớp';
+    if (!dob) newErrors.dob = 'Vui lòng nhập ngày sinh';
+    if (!phone.trim()) newErrors.phone = 'Vui lòng nhập số điện thoại';
+    if (!idNumber.trim()) newErrors.idNumber = 'Vui lòng nhập CCCD';
     if (filesGroup1.length === 0) newErrors.group1 = 'Bạn cần chọn ít nhất một file';
     if (filesGroup2.length === 0) newErrors.group2 = 'Bạn cần chọn ít nhất một file';
     if (filesGroup3.length === 0) newErrors.group3 = 'Bạn cần chọn ít nhất một file';
@@ -70,14 +74,16 @@ function UploadForm() {
     if (!validateForm()) return;
 
     const allFiles = [
-      ...filesGroup1.map(f => ({ ...f, group: 'Tepvanban' })),
-      ...filesGroup2.map(f => ({ ...f, group: 'Hinhanh' })),
-      ...filesGroup3.map(f => ({ ...f, group: 'Tailieukhac' })),
+      ...filesGroup1.map(f => ({ ...f, group: 'Upload1' })),
+      ...filesGroup2.map(f => ({ ...f, group: 'Upload2' })),
+      ...filesGroup3.map(f => ({ ...f, group: 'Upload3' })),
     ];
 
     const formData = new FormData();
     formData.append('ho_ten', fullName);
-    formData.append('lop', className);
+    formData.append('ngay_sinh', dob);
+    formData.append('so_dien_thoai', phone);
+    formData.append('can_cuoc_cong_dan', idNumber);
     allFiles.forEach(f => {
       formData.append('files', f.file); // file
       formData.append('fileGroups', f.group); // tên nhóm tương ứng
@@ -93,7 +99,9 @@ function UploadForm() {
         navigate('/success', {
           state: {
             fullName,
-            className,
+            dob,
+            phone,
+            idNumber,
             uploadedFiles: res.data.user.files.map((f, i) => ({
               id: i + 1,
               name: f.file_name,
@@ -105,7 +113,9 @@ function UploadForm() {
         });
 
         setFullName('');
-        setClassName('');
+        setDob('');
+        setPhone('');
+        setIdNumber('');
         setFilesGroup1([]);
         setFilesGroup2([]);
         setFilesGroup3([]);
@@ -183,35 +193,87 @@ function UploadForm() {
             )}
           </div>
 
-          {/* Class */}
+          {/* Date of Birth */}
           <div className="space-y-2">
             <label className="flex items-center text-sm font-medium text-gray-700">
-              <GraduationCap className="w-4 h-4 mr-2 text-blue-600" />
-              Lớp
+              <CalendarDays className="w-4 h-4 mr-2 text-blue-600" />
+              Ngày sinh
+            </label>
+            <input
+              type="date"
+              value={dob}
+              onChange={(e) => {
+                setDob(e.target.value);
+                setErrors(prev => ({ ...prev, dob: '' }));
+              }}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
+                errors.dob ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              placeholder="dd/mm/yyyy"
+            />
+            {errors.dob && (
+              <p className="flex items-center text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                {errors.dob}
+              </p>
+            )}
+          </div>
+
+          {/* Phone Number */}
+          <div className="space-y-2">
+            <label className="flex items-center text-sm font-medium text-gray-700">
+              <Phone className="w-4 h-4 mr-2 text-blue-600" />
+              Số điện thoại
             </label>
             <input
               type="text"
-              value={className}
+              value={phone}
               onChange={(e) => {
-                setClassName(e.target.value);
-                setErrors(prev => ({ ...prev, className: '' }));
+                setPhone(e.target.value);
+                setErrors(prev => ({ ...prev, phone: '' }));
               }}
               className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
-                errors.className ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+                errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
               }`}
-              placeholder="Nhập lớp của bạn"
+              placeholder="Nhập Số điện thoại của bạn"
             />
-            {errors.className && (
+            {errors.phone && (
               <p className="flex items-center text-sm text-red-600">
                 <AlertCircle className="w-4 h-4 mr-1" />
-                {errors.className}
+                {errors.phone}
+              </p>
+            )}
+          </div>
+
+          {/* Citizen ID */}
+          <div className="space-y-2">
+            <label className="flex items-center text-sm font-medium text-gray-700">
+              <IdCard className="w-4 h-4 mr-2 text-blue-600" />
+              Căn cước công dân 
+            </label>
+            <input
+              type="text"
+              value={idNumber}
+              onChange={(e) => {
+                setIdNumber(e.target.value);
+                setErrors(prev => ({ ...prev, idNumber: '' }));
+              }}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all ${
+                errors.idNumber ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
+              }`}
+              placeholder="Nhập CCCD của bạn"
+            />
+            {errors.idNumber && (
+              <p className="flex items-center text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                {errors.idNumber}
               </p>
             )}
           </div>
 
           {/* File Upload */}
           <FileUploadGroup
-            label="Tệp văn bản"
+            label="Upload 1"
             files={filesGroup1}
             onFileSelect={(files) => handleFileSelect(files, setFilesGroup1)}
             onRemoveFile={(id) => removeFile(id, setFilesGroup1)}
@@ -224,7 +286,7 @@ function UploadForm() {
           />
 
           <FileUploadGroup
-            label="Hình ảnh"
+            label="Upload 2"
             files={filesGroup2}
             onFileSelect={(files) => handleFileSelect(files, setFilesGroup2)}
             onRemoveFile={(id) => removeFile(id, setFilesGroup2)}
@@ -237,7 +299,7 @@ function UploadForm() {
           />
 
           <FileUploadGroup
-            label="Tài liệu khác"
+            label="Upload 3"
             files={filesGroup3}
             onFileSelect={(files) => handleFileSelect(files, setFilesGroup3)}
             onRemoveFile={(id) => removeFile(id, setFilesGroup3)}

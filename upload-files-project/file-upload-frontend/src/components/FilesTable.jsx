@@ -4,6 +4,7 @@ import { Download, Trash2, Info, Loader, ChevronDown, ChevronUp, Minus, SortAsc,
 import FileDetails from './FileDetails';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { format } from 'date-fns';
 
 function FilesTable() {
   const [data, setData] = useState([]);
@@ -11,6 +12,23 @@ function FilesTable() {
   const [error, setError] = useState('');
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [globalFilter, setGlobalFilter] = useState('');
+
+  const fetchData = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/upload/list');
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || 'Lỗi không xác định');
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const toggleRow = (rowId) => {
     const newSet = new Set(expandedRows);
@@ -31,6 +49,7 @@ function FilesTable() {
 
       setData(data.filter(user => user.id !== userId));
       alert('Đã xoá người dùng.');
+      await fetchData();
     } catch (err) {
       alert(`${err.message}`);
     }
@@ -40,64 +59,41 @@ function FilesTable() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Danh sách Upload');
 
-    // Header
     worksheet.columns = [
-      { header: 'Họ tên', key: 'fullName', width: 25 },
-      { header: 'Lớp', key: 'className', width: 15 },
-      { header: 'Ngày upload', key: 'createdAt', width: 18 },
+      { header: 'Họ tên', key: 'name', width: 25 },
+      { header: 'Ngày sinh', key: 'birth', width: 18 },
+      { header: 'SĐT', key: 'phone', width: 15 },
+      { header: 'CCCD', key: 'cccd', width: 20 },
+      { header: 'Ngày upload', key: 'uploadDate', width: 18 },
       { header: 'Tên file', key: 'fileName', width: 30 },
       { header: 'Dung lượng (KB)', key: 'fileSize', width: 20 },
     ];
 
-    // Format dữ liệu: convert key về camelCase để dễ xài
-    const formattedUploads = uploads.map(upload => ({
-      fullName: upload.name,
-      className: upload.class,
-      createdAt: upload.uploadDate,
-      files: upload.files.map(file => ({
-        fileName: file.file_name,
-        fileSize: file.file_size,
-      })),
-    }));
-
-    // Ghi từng file ra một dòng
-    formattedUploads.forEach(upload => {
+    uploads.forEach(upload => {
       upload.files.forEach(file => {
         worksheet.addRow({
-          fullName: upload.fullName,
-          className: upload.className,
-          createdAt: upload.createdAt,
-          fileName: file.fileName,
-          fileSize: (file.fileSize / 1024).toFixed(2), // KB
+          name: upload.name,
+          birth: upload.birth,
+          phone: upload.phone,
+          cccd: upload.cccd,
+          uploadDate: upload.uploadDate,
+          fileName: file.file_name,
+          fileSize: (file.file_size / 1024).toFixed(2), // KB
         });
       });
     });
 
-    // Export
     const buffer = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), 'Danh_sach_upload.xlsx');
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/api/upload/list');
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.message || 'Lỗi không xác định');
-        setData(result);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   const columns = useMemo(() => [
     { Header: 'ID', accessor: 'id' },
     { Header: 'Họ và tên', accessor: 'name' },
-    { Header: 'Lớp', accessor: 'class' },
+    { Header: 'Ngày sinh', accessor: 'birth', Cell: ({ value }) => value ? format(new Date(value), 'dd/MM/yyyy') : '—' },
+    { Header: 'Số điện thoại', accessor: 'phone' },
+    { Header: 'CCCD', accessor: 'cccd' },
     {
       Header: 'Chi tiết',
       accessor: 'files',
@@ -120,7 +116,7 @@ function FilesTable() {
       accessor: 'download',
       Cell: ({ row }) => (
         <a
-          href={`http://localhost:5000/downloads/${row.original.files[0]?.folder_name}`}
+          href={`http://localhost:5000/downloads/${row.original.folder}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center text-green-600 hover:underline"
@@ -129,7 +125,7 @@ function FilesTable() {
         </a>
       )
     },
-    { Header: 'Ngày upload', accessor: 'uploadDate' },
+    { Header: 'Ngày upload', accessor: 'uploadDate'},
     {
       Header: 'Thao tác',
       accessor: 'actions',
@@ -143,6 +139,7 @@ function FilesTable() {
       )
     },
   ], [expandedRows]);
+
 
   const {
     getTableProps,

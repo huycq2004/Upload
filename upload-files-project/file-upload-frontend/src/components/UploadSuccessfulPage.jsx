@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2, ArrowLeft,
-  FileText, Calendar, User, GraduationCap, Package, Star
+  FileText, Calendar, User, Package, Star,
+  Phone, IdCard
 } from 'lucide-react';
 
 const UploadSuccessfulPage = () => {
@@ -10,7 +11,10 @@ const UploadSuccessfulPage = () => {
 
   // Fallback nếu user F5 mất state
   const fullName = state?.fullName || 'Chưa rõ';
-  const className = state?.className || 'Chưa rõ';
+  const dob = state?.dob || 'Chưa rõ';
+  const phone = state?.phone || 'Chưa rõ';
+  const idNumber = state?.idNumber || 'Chưa rõ';
+
   const uploadedFiles = state?.uploadedFiles || [];
 
   const formatFileSize = (bytes) => {
@@ -64,38 +68,56 @@ const UploadSuccessfulPage = () => {
             {/* Submission Summary */}
             <div className="lg:col-span-2 space-y-6">
               {/* Student Information */}
-              <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <User className="w-6 h-6 text-emerald-600 mr-3" />
-                  Thông tin học sinh
-                </h2>
-                
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-2xl">
-                      <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                        <User className="w-5 h-5 text-emerald-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-emerald-700">Họ và tên</p>
-                        <p className="text-lg font-bold text-gray-900">{fullName}</p>
-                      </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-2xl">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                      <User className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-emerald-700">Họ và tên</p>
+                      <p className="text-lg font-bold text-gray-900">{fullName}</p>
                     </div>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-4 bg-teal-50 rounded-2xl">
-                      <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-                        <GraduationCap className="w-5 h-5 text-teal-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-teal-700">Lớp</p>
-                        <p className="text-lg font-bold text-gray-900">{className}</p>
-                      </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-4 bg-teal-50 rounded-2xl">
+                    <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-teal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-teal-700">Ngày sinh</p>
+                      <p className="text-lg font-bold text-gray-900">{dob}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-2xl">
+                    <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+                      <Phone className="w-5 h-5 text-teal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-teal-700">Số điện thoại</p>
+                      <p className="text-lg font-bold text-gray-900">{phone}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-2xl">
+                    <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
+                      <IdCard className="w-5 h-5 text-teal-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-teal-700">CCCD</p>
+                      <p className="text-lg font-bold text-gray-900">{idNumber}</p>
                     </div>
                   </div>
                 </div>
               </div>
+
 
               {/* Files List */}
               <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
