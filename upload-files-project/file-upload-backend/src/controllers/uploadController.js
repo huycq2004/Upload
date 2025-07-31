@@ -33,6 +33,7 @@ exports.handleUpload = async (req, res) => {
   const folder_timestamp = formatTimestamp();
   const folderName = `${ho_ten.replace(/\s+/g, '_')}_${folder_timestamp}`;
   const uploadDir = path.join(UPLOAD_BASE, folderName);
+  console.log(uploadDir);
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
