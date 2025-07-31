@@ -35,13 +35,15 @@ CREATE DATABASE upload_files_management;
 -- Bảng user
 CREATE TABLE user (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
-  ho_ten VARCHAR(255),
-  lop VARCHAR(100),
+  ho_ten VARCHAR(255) NOT NULL,
+  ngay_sinh DATE,
+  so_dien_thoai VARCHAR(20),
+  can_cuoc_cong_dan VARCHAR(20),
   upload_time DATETIME DEFAULT CURRENT_TIMESTAMP,
   folder_name VARCHAR(255)
 );
 
--- Bảng detail (file chi tiết)
+-- Bảng detail
 CREATE TABLE detail (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT,
