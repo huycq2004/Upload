@@ -42,7 +42,7 @@ function FilesTable() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:5001/api/delete/${userId}`, {
+      const res = await fetch(`${API_BASE_URL}api/delete/${userId}`, {
         method: 'DELETE'
       });
       const result = await res.json();
@@ -117,7 +117,7 @@ function FilesTable() {
       accessor: 'download',
       Cell: ({ row }) => (
         <a
-          href={`http://localhost:5001/downloads/${row.original.folder}`}
+          href={`${API_BASE_URL}downloads/${row.original.folder}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center text-green-600 hover:underline"
