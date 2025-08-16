@@ -5,6 +5,7 @@ import FileDetails from './FileDetails';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function FilesTable() {
   const [data, setData] = useState([]);
@@ -15,7 +16,7 @@ function FilesTable() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/upload/list');
+      const res = await fetch(`${API_BASE_URL}api/upload/list`);
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Lỗi không xác định');
       setData(result);

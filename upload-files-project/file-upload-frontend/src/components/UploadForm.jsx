@@ -3,6 +3,7 @@ import { Upload, Check, User, GraduationCap, AlertCircle, CalendarDays, Phone, I
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import FileUploadGroup from './FileUploadGroup';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function UploadForm() {
   //Khai báo useState cho họ và tên + lớp
@@ -91,7 +92,7 @@ function UploadForm() {
 
     try {
       setIsUploading(true);
-      const res = await axios.post('http://localhost:5001/api/upload', formData, {
+      const res = await axios.post(`${API_BASE_URL}api/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
