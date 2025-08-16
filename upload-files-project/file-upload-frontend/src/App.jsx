@@ -9,7 +9,7 @@ import UploadErrorPage from './components/UploadErrorPage';
 
 function App() {
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // ✅ mới thêm
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
     const storedLogin = localStorage.getItem('adminLoggedIn');
@@ -17,7 +17,7 @@ function App() {
     if (storedLogin === 'true' && storedUsername) {
       setLoggedInUser(storedUsername);
     }
-    setIsLoadingAuth(false); // ✅ xong rồi thì cho render
+    setIsLoadingAuth(false);
   }, []);
 
   const handleLogout = () => {
@@ -27,7 +27,7 @@ function App() {
   };
 
   if (isLoadingAuth) {
-    return <div className="text-center mt-10 text-gray-500">⏳ Đang tải...</div>; // ✅ Loading tạm thời
+    return <div className="text-center mt-10 text-gray-500">Đang tải...</div>;
   }
 
   return (
@@ -43,7 +43,7 @@ function App() {
                 <div className="flex items-center justify-between mb-6">
                   <div className="space-y-1">
                     <h2 className="text-2xl font-bold text-gray-800">
-                      👋 Xin chào, <span className="text-blue-600">{loggedInUser}</span>
+                      Xin chào, <span className="text-blue-600">{loggedInUser}</span>
                     </h2>
                     <p className="text-sm text-gray-500">
                       Chào mừng bạn trở lại. Dưới đây là danh sách các file đã được upload.

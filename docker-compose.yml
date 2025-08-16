@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 1. Dịch vụ Database
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      # Gắn một volume để dữ liệu database không bị mất khi container bị xóa/tạo lại
+      - db-data:/var/lib/mysql
+
+  # 2. Dịch vụ Backend
+  backend:
+    build: ./file-upload-backend
+    restart: always
+    ports:
+      # Map cổng 5000 của máy chủ vào cổng 5000 của container
+      - "5000:5000"
+    environment:
+      # Các biến môi trường cho backend
+      DB_HOST: db  # << Rất quan trọng: host là tên service 'db' ở trên
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    volumes:
+      # Gắn một volume để lưu các file đã upload, tránh mất file
+      - uploads:/app/uploads
+    depends_on:
+      # Khởi động backend chỉ sau khi db đã sẵn sàng
+      - db
+
+  # 3. Dịch vụ Frontend
+  frontend:
+    build: ./file-upload-frontend
+    restart: always
+    ports:
+      # Map cổng 80 của máy chủ vào cổng 80 của container
+      - "80:80"
+
+# Định nghĩa các volumes được sử dụng ở trên
+volumes:
+  db-data:
+  uploads:

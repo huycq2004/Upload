@@ -15,7 +15,7 @@ function FilesTable() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/upload/list');
+      const res = await fetch('http://localhost:5001/api/upload/list');
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Lỗi không xác định');
       setData(result);
@@ -41,7 +41,7 @@ function FilesTable() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/delete/${userId}`, {
+      const res = await fetch(`http://localhost:5001/api/delete/${userId}`, {
         method: 'DELETE'
       });
       const result = await res.json();
@@ -78,7 +78,7 @@ function FilesTable() {
           cccd: upload.cccd,
           uploadDate: upload.uploadDate,
           fileName: file.file_name,
-          fileSize: (file.file_size / 1024).toFixed(2), // KB
+          fileSize: (file.file_size / 1024).toFixed(2),
         });
       });
     });
@@ -116,7 +116,7 @@ function FilesTable() {
       accessor: 'download',
       Cell: ({ row }) => (
         <a
-          href={`http://localhost:5000/downloads/${row.original.folder}`}
+          href={`http://localhost:5001/downloads/${row.original.folder}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center text-green-600 hover:underline"
